@@ -1,0 +1,14 @@
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: metrics-bucket
+  namespace: open-cluster-management-observability
+  finalizers:
+    - objectbucket.io/finalizer
+spec:
+  additionalConfig:
+    bucketclass: noobaa-default-bucket-class
+  bucketName: metrics-bucket-851ee325-af25-468f-9374-0c2857f7d238
+  generateBucketName: metrics-bucket
+  objectBucketName: obc-open-cluster-management-metrics-bucket
+  storageClassName: openshift-storage.noobaa.io

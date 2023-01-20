@@ -1,0 +1,9 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: lokistack-gateway-bearer-token
+  namespace: openshift-logging
+data:
+  token: >-
+    ${token}
+type: Opaque

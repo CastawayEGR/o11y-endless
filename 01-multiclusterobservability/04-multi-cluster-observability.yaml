@@ -1,0 +1,23 @@
+apiVersion: observability.open-cluster-management.io/v1beta2
+kind: MultiClusterObservability
+metadata:
+  name: observability
+spec:
+  enableDownsampling: true
+  observabilityAddonSpec:
+    enableMetrics: true
+    interval: 300
+  storageConfig:
+    alertmanagerStorageSize: 1Gi
+    compactStorageSize: 100Gi
+    metricObjectStorage:
+      key: thanos.yaml
+      name: thanos-object-storage
+      #tlsSecretName: noobaa-s3-serving-cert
+      #tlsSecretName: noobaa-operator-service-cert
+      http_config:
+        insecure_skip_verify: true
+    receiveStorageSize: 100Gi
+    ruleStorageSize: 1Gi
+    storageClass: gp2
+    storeStorageSize: 10Gi

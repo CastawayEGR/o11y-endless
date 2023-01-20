@@ -1,0 +1,12 @@
+apiVersion: logging.openshift.io/v1
+kind: ClusterLogging
+metadata:
+  name: instance
+  namespace: openshift-logging
+  annotations:
+    logging.openshift.io/preview-vector-collector: enabled
+spec:
+spec:
+  collection:
+    type: vector
+  managementState: Managed

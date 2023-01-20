@@ -1,0 +1,14 @@
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: logs-bucket
+  namespace: openshift-logging
+  finalizers:
+    - objectbucket.io/finalizer
+spec:
+  additionalConfig:
+    bucketclass: noobaa-default-bucket-class
+  bucketName: logs-bucket-851ee325-af25-468f-9374-0c2857f7d238
+  generateBucketName: logs-bucket
+  objectBucketName: obc-open-cluster-management-logs-bucket
+  storageClassName: openshift-storage.noobaa.io
