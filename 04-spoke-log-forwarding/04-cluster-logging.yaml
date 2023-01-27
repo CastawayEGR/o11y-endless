@@ -6,7 +6,6 @@ metadata:
   annotations:
     logging.openshift.io/preview-vector-collector: enabled
 spec:
-spec:
   collection:
     type: vector
   managementState: Managed
