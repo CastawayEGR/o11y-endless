@@ -13,6 +13,13 @@ This repo contains the needed files to deploy the multiclusterobservability at a
 
 ## RHACM Policy Installation Option (Preferred)
 
+### Git clone repo
+
+```
+git clone https://github.com/CastawayEGR/o11y-endless.git
+cd o11y-endless/
+```
+
 ### Create rhacm-policies namespace
 
 ```
