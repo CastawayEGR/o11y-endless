@@ -11,7 +11,30 @@ This repo contains the needed files to deploy the multiclusterobservability at a
 * Red Hat OpenShift Data Foundation
 
 
-## Installation
+## RHACM Policy Installation Option (Preferred)
+
+### Create rhacm-policies namespace
+
+```
+oc new-project rhacm-policies
+```
+
+### Apply RHACM Policies
+
+04_spoke-log-forwarding-policy.yaml will fail due to non-exist openshift-logging namespace, ignore this.
+
+```
+oc apply -f rhacm-policies/
+```
+
+Once the policies have been applied and enforced, openshift-logging should now exist. Apply the last policy for the spoke-clusters.
+
+```
+oc apply -f rhacm-policies/04_spoke-log-forwarding-policy.yaml
+```
+
+
+## Manual Installation Option (Alternative)
 
 ### Git clone repo
 
