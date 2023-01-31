@@ -1,0 +1,220 @@
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-spoke-log-forwarding
+  namespace: openshift-logging
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+    - key: vendor
+      operator: In
+      values:
+      - OpenShift
+    - key: local-cluster
+      operator: NotIn
+      values:
+      - "true"
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-spoke-log-forwarding
+  namespace: openshift-logging
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-spoke-log-forwarding
+subjects:
+- apiGroup: policy.open-cluster-management.io
+  kind: Policy
+  name: spoke-log-forwarding
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  name: spoke-log-forwarding
+  namespace: openshift-logging
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: spoke-log-forwarding
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: project.openshift.io/v1
+            kind: Project
+            metadata:
+              name: openshift-operators-redhat
+            spec: {}
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: project.openshift.io/v1
+            kind: Project
+            metadata:
+              name: openshift-logging
+            spec: {}
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: operators.coreos.com/v1
+            kind: OperatorGroup
+            metadata:
+              name: openshift-operators-redhat-bltqk
+              namespace: openshift-operators-redhat
+            spec: {}
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: operators.coreos.com/v1
+            kind: OperatorGroup
+            metadata:
+              name: openshift-logging-5bc8v
+              namespace: openshift-logging
+            spec:
+              targetNamespaces:
+              - openshift-logging
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: operators.coreos.com/v1alpha1
+            kind: Subscription
+            metadata:
+              name: cluster-logging
+              namespace: openshift-logging
+            spec:
+              channel: stable
+              installPlanApproval: Automatic
+              name: cluster-logging
+              source: redhat-operators
+              sourceNamespace: openshift-marketplace
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: operators.coreos.com/v1alpha1
+            kind: Subscription
+            metadata:
+              name: elasticsearch-operator
+              namespace: openshift-operators-redhat
+            spec:
+              channel: stable
+              installPlanApproval: Automatic
+              name: elasticsearch-operator
+              source: redhat-operators
+              sourceNamespace: openshift-marketplace
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: v1
+            kind: ServiceAccount
+            metadata:
+              name: logcollector
+              namespace: openshift-logging
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRole
+            metadata:
+              name: lokistack-tenant-logs
+            rules:
+            - apiGroups:
+              - loki.grafana.com
+              resourceNames:
+              - logs
+              resources:
+              - application
+              - infrastructure
+              - audit
+              verbs:
+              - create
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              name: lokistack-tenant-logs
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: lokistack-tenant-logs
+            subjects:
+            - kind: ServiceAccount
+              name: logcollector
+              namespace: openshift-logging
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: logging.openshift.io/v1
+            kind: ClusterLogging
+            metadata:
+              annotations:
+                logging.openshift.io/preview-vector-collector: enabled
+              name: instance
+              namespace: openshift-logging
+            spec:
+              collection:
+                type: vector
+              managementState: Managed
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: v1
+            data:
+              token: '{{hub fromSecret "openshift-logging" "logcollector-token" "token" hub}}'
+            kind: Secret
+            metadata:
+              name: lokistack-gateway-bearer-token
+              namespace: openshift-logging
+            type: Opaque
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: logging.openshift.io/v1
+            kind: ClusterLogForwarder
+            metadata:
+              name: instance
+              namespace: openshift-logging
+            spec:
+              outputs:
+              - name: loki-app
+                secret:
+                  name: lokistack-gateway-bearer-token
+                type: loki
+                url: 'https://{{hub ( index ( lookup "route.openshift.io/v1" "Route" "openshift-logging" "logging-loki").spec.host ) hub}}/api/logs/v1/application'
+              - name: loki-infra
+                secret:
+                  name: lokistack-gateway-bearer-token
+                type: loki
+                url: 'https://{{hub ( index ( lookup "route.openshift.io/v1" "Route" "openshift-logging" "logging-loki").spec.host ) hub}}/api/logs/v1/infrastructure'
+              - name: loki-audit
+                secret:
+                  name: lokistack-gateway-bearer-token
+                type: loki
+                url: 'https://{{hub ( index ( lookup "route.openshift.io/v1" "Route" "openshift-logging" "logging-loki").spec.host ) hub}}/api/logs/v1/audit'
+              pipelines:
+              - inputRefs:
+                - application
+                labels:
+                  cluster: azure-dev-cluster
+                name: send-app-logs
+                outputRefs:
+                - loki-app
+              - inputRefs:
+                - infrastructure
+                labels:
+                  cluster: azure-dev-cluster
+                name: send-infra-logs
+                outputRefs:
+                - loki-infra
+              - inputRefs:
+                - audit
+                labels:
+                  cluster: azure-dev-cluster
+                name: send-audit-logs
+                outputRefs:
+                - loki-audit
+        remediationAction: enforce
+        severity: low
