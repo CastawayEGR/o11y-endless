@@ -1152,7 +1152,7 @@ spec:
                       },
                       "targets": [
                         {
-                          "expr": "{kubernetes_namespace_name=\"$namespace\"}|json",
+                          "expr": "{kubernetes_namespace_name=\"$namespace\"}|json|line_format \"{{.message}}\"",
                           "refId": "A"
                         }
                       ],
@@ -2047,7 +2047,7 @@ spec:
                       },
                       "targets": [
                         {
-                          "expr": "{kubernetes_namespace_name=\"$namespace\"}|json",
+                          "expr": "{kubernetes_namespace_name=\"$namespace\"}|json|line_format \"{{.message}}\"",
                           "refId": "A"
                         }
                       ],
@@ -3431,7 +3431,7 @@ spec:
                       },
                       "targets": [
                         {
-                          "expr": "{kubernetes_namespace_name=\"$namespace\",kubernetes_pod_name=\"$pod\"}|json",
+                          "expr": "{kubernetes_namespace_name=\"$namespace\",kubernetes_pod_name=\"$pod\"}|json|line_format \"{{.message}}\"",
                           "refId": "A"
                         }
                       ],

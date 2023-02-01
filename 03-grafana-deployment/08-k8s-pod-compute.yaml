@@ -1191,7 +1191,7 @@ spec:
           },
           "targets": [
             {
-              "expr": "{kubernetes_namespace_name=\"$namespace\",kubernetes_pod_name=\"$pod\"}|json",
+              "expr": "{kubernetes_namespace_name=\"$namespace\",kubernetes_pod_name=\"$pod\"}|json|line_format \"{{.message}}\"",
               "refId": "A"
             }
           ],
