@@ -26,7 +26,6 @@ spec:
   name: cluster-logging
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: cluster-logging.5.5.5
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -39,4 +38,3 @@ spec:
   name: elasticsearch-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: elasticsearch-operator.5.5.5
